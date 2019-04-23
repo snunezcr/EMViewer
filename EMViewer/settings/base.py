@@ -26,8 +26,7 @@ SECRET_KEY = 'x0vd%(ugtz1^0^4b$$!$zgb8$0*oz46q5v1jsm6du(t+ko_3m6'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'http://visor.reciem.org'
+    '*'
 ]
 
 
