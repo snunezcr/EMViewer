@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Organizaciones registradas</h1>
+  {% if organization_list %}
+  <ul>
+    {% for org in organization_list  %}
+      <li>
+        <a href="{{ org.get_absolute_url }}">{{ org.short}}</a> --- {{org.name}}
+      </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>No existen organizaciones registradas en este momento.</p>
+  {% endif %}
+{% endblock %}

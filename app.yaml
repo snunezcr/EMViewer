@@ -1,0 +1,24 @@
+runtime: python
+
+entrypoint: gunicorn -b :$PORT EMViewer.wsgi
+env: flex
+
+env_variables:
+  SECRET_KEY: 'x0vd%(ugtz1^0^4b$$!$zgb8$0*oz46q5v1jsm6du(t+ko_3m6'
+  DEBUG: 'False'
+  DB_HOST: '/cloudsql/reciem-top-site:us-central1:emviewer-reciem'
+  DB_PORT: 5432
+  DB_NAME: 'emviewer-reciem'
+  DB_USER: 'emviewer'
+  DB_PASSWORD: 'Minerva138'
+  STATIC_URL: 'https://storage.googleapis.com/emviewer-static-content/static/'
+
+handlers:
+  - url: /static
+    static_dir: static
+
+beta_settings:
+  cloud_sql_instances: reciem-top-site:us-central1:emviewer-reciem
+
+runtime_config:
+  python_version: 3

@@ -1,0 +1,27 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Web GIS para manejo de emergencias en Costa Rica</h1>
+
+    <h3>Red Ciudadana de Estaciones Meteorológicas</h3>
+
+    <p>En este sitio usted podrá generar posibles escenarios de riesgos mediante la visualización de diferentes capas. Las capas son obtenidas de múltiples organizaciones registradas que proveen servicios WMS y WFS útiles para gestión del riesgo a nivel local y nacional en Costa Rica.</p>
+
+    <p>Si usted o su organización tienen interés en participar de este proyecto contribuyendo con capas de datos, siéntase libre de compartir sus capas de datos. Para ello utilice el menú lateral en el enlace "Contáctenos". </p>
+
+    <h2>Recursos del sitio</h2>
+
+    Las herramientas GIS con las que usted cuenta son:
+
+    <ul>
+        <li><p>Información geográfica relacionada a emergencias y vulnerabilidad a nivel distrital, cantonal y provincial.</p><p>Inicialmente nuestro enfoque es en Costa Rica, pero estamos abiertos a contribuir con nuestros hermanos centroamericanos.</p></li>
+        <li>Dichas capas pueden ser combinadas mediante álgebra de mapas para obtener nueva información útil para la atención de emergencias y reducción de vulnerabilidad.</li>
+    </ul>
+
+    <p>Al día de hoy usted puede accesar:</p>
+    <ul>
+        <li><strong>Organizaciones:</strong> {{ num_organizations }}</li>
+        <li><strong>Servicios:</strong> {{ num_services }}</li>
+    </ul>
+
+{% endblock %}

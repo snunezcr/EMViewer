@@ -1,0 +1,20 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Organización: {{ organization.short }}</h1>
+
+  <p><strong>Nombre:</strong> <a href="">{{ organization.name }}</a></p>
+  <p><strong>Categoría:</strong> {{ organization.type}}</p>
+  <p><strong>Provincia:</strong> {{ organization.province}}</p>
+  <p><strong>Cantón:</strong> {{ organization.canton}}</p>
+  <p><strong>Distrito:</strong> {{ organization.district}}</p>
+
+  <div style="margin-left:20px;margin-top:20px">
+    <h4>Ubicación</h4>
+
+  <p><strong>Dirección:</strong> {{ organization.address }}</p>
+  <p><strong>Teléfono:</strong> <a href="">{{ organization.phone }}</a></p>
+  <p><strong>Página web:</strong> <a href="">{{ organization.url }}</a></p>
+
+  </div>
+{% endblock %}

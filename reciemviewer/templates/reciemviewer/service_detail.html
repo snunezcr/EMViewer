@@ -1,0 +1,33 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Servicio: {{ service.short}}</h1>
+
+  <p><strong>Nombre:</strong> <a href="">{{ service.name }}</a></p>
+  <p><strong>Categoría:</strong> {{ service.type}}</p>
+  <p><strong>Organización:</strong> {{ service.org.short}}</p>
+
+  <div style="margin-left:20px;margin-top:20px">
+    <h4>Información técnica</h4>
+
+  <p><strong>Descripción:</strong> {{ service.description}}</p>
+
+  <h4>Capas disponibles</h4>
+
+
+  {% if service.get_layer_list %}
+  <ul>
+    {% for layer in service.get_layer_list %}
+      <li>
+          <strong>{{ layer.name }}</strong> --- {{ layer.title }}
+          <p><i>Resumen:</i> {{ layer.abstract }}</p>
+          <p><i>Límites geográficos WGS84:</i> {{ layer.boundingBoxWGS84 }} </p>
+      </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>No existen capas registradas para este servicio en este momento.</p>
+  {% endif %}
+
+  </div>
+{% endblock %}

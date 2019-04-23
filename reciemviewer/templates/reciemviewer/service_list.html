@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Servicios registrados</h1>
+  {% if service_list %}
+  <ul>
+    {% for serv in service_list  %}
+      <li>
+        <a href="{{ serv.get_absolute_url }}">{{ serv.short}}</a> --- {{serv.name}} --- Organización: {{ serv.org.short}}
+      </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>No existen servicios registrados en este momento.</p>
+  {% endif %}       
+{% endblock %}
