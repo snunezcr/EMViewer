@@ -50,7 +50,7 @@ class ServiceDetailView(generic.DetailView):
 
 
 class OrganizationListGenerate(generics.ListCreateAPIView):
-    queryset = Organization.objects.all()
+    queryset = Organization.objects.all().order_by('short')
     serializer_class = OrganizationSerializer
 
 
@@ -60,7 +60,7 @@ class ContactListGenerate(generics.ListCreateAPIView):
 
 
 class ServiceListGenerate(generics.ListCreateAPIView):
-    queryset = Service.objects.all()
+    queryset = Service.objects.all().order_by('short')
     serializer_class = ServiceSerializer
 
 
