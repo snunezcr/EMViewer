@@ -7,7 +7,7 @@
   {% if service_list %}
     {% for serv in service_list  %}
         <h4><a href="{{ serv.get_absolute_url }}">{{ serv.short}}</a> --- {{serv.name}} --- Organización: {{ serv.org.short}}</h4>
-        {% for layer in serv.get_layer_list %}
+        {% for layer in serv.get_layer_list_cache %}
         <li>
           <strong>{{ layer.name }}</strong> --- {{ layer.title }}
           <p><i>Resumen:</i> {{ layer.abstract }}</p>

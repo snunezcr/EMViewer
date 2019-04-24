@@ -6,8 +6,8 @@
 
 from django.db import models
 from django.urls import reverse
+from django.core.cache import cache
 from owslib.wms import WebMapService
-from owslib.wfs import WebFeatureService
 
 class Organization(models.Model):
     short = models.CharField(max_length=10, help_text='Siglas')
@@ -82,15 +82,18 @@ class Service(models.Model):
     def get_url(self):
         return self.url
 
-    # We obtain the list of services as objects
+    # We obtain the list of services as objects - uses cache
     def get_layer_list(self):
-        if not self.slist:
+        slist = []
+
+        if cache.get(self.url) is None:
             print('Obtaining data for the first time')
             if self.type == 'wms':
                 try:
                     serwms = WebMapService(self.url)
                     # Only select those contents that are queriable
-                    self.slist = list(filter(lambda x: x.queryable, list(serwms.contents.values())))
+                    slist = list(filter(lambda x: x.queryable, list(serwms.contents.values())))
+                    cache.set(self.url, slist)
                 except Exception:
                     pass
             elif self.type == 'wfs':
@@ -98,6 +101,25 @@ class Service(models.Model):
             else:
                 pass
         else:
-            print('Data lives in cache')
+            slist = cache.get(self.url)
 
-        return self.slist
+        return slist
+
+    # We obtain the list of services as objects - fills up cache
+    def get_layer_list_cache(self):
+        slist = []
+        print('Obtaining data for the first time')
+        if self.type == 'wms':
+            try:
+                serwms = WebMapService(self.url)
+                # Only select those contents that are queriable
+                slist = list(filter(lambda x: x.queryable, list(serwms.contents.values())))
+                cache.set(self.url, slist)
+            except Exception:
+                pass
+        elif self.type == 'wfs':
+            pass
+        else:
+            pass
+
+        return slist
