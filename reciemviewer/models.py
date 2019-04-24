@@ -6,7 +6,7 @@
 
 from django.db import models
 from django.urls import reverse
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from owslib.wms import WebMapService
 
 class Organization(models.Model):
@@ -108,7 +108,7 @@ class Service(models.Model):
     # We obtain the list of services as objects - fills up cache
     def get_layer_list_cache(self):
         slist = []
-        print('Obtaining data for the first time')
+        print(caches.all())
         if self.type == 'wms':
             try:
                 serwms = WebMapService(self.url)
