@@ -104,22 +104,3 @@ class Service(models.Model):
             slist = cache.get(self.url)
 
         return slist
-
-    # We obtain the list of services as objects - fills up cache
-    def get_layer_list_cache(self):
-        slist = []
-        print(caches.all())
-        if self.type == 'wms':
-            try:
-                serwms = WebMapService(self.url)
-                # Only select those contents that are queriable
-                slist = list(filter(lambda x: x.queryable, list(serwms.contents.values())))
-                cache.set(self.url, slist)
-            except Exception:
-                pass
-        elif self.type == 'wfs':
-            pass
-        else:
-            pass
-
-        return slist
