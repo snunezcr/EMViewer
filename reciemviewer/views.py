@@ -6,17 +6,16 @@
 from rest_framework import generics
 from reciemviewer.models import Organization, Contact, Service
 from reciemviewer.serializers import OrganizationSerializer, ContactSerializer, ServiceSerializer
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from django.shortcuts import render
 from django.views import generic
-import owslib.wms
 
 
 def index(request):
     num_organizations = Organization.objects.all().count()
     num_services = Service.objects.all().count()
     num_contacts = Contact.objects.all().count()
-
-    # TODO: add code to count layers
 
     context = {
         'num_organizations' : num_organizations,
@@ -39,7 +38,7 @@ class ServiceView(generic.ListView):
     model = Service
     template_name = 'reciemviewer/service_list.html'
 
-
+@method_decorator(cache_page(60 * 10), name='dispatch')
 class LayerView(generic.ListView):
     model = Service
     template_name = 'reciemviewer/layersall_list.html'
@@ -63,7 +62,7 @@ class ServiceListGenerate(generics.ListCreateAPIView):
     queryset = Service.objects.all().order_by('short')
     serializer_class = ServiceSerializer
 
-
+@method_decorator(cache_page(60 * 10), name='dispatch')
 class VisorView(generic.ListView):
     model = Service
     template_name = 'reciemviewer/visor.html'
