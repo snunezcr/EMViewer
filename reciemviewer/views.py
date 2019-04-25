@@ -41,7 +41,7 @@ class ServiceView(generic.ListView):
     model = Service
     template_name = 'reciemviewer/service_list.html'
 
-@method_decorator(cache_page(60 * 20), name='dispatch')
+@method_decorator(cache_page(60 * 60 * 4), name='dispatch')
 class LayerView(generic.ListView):
     model = Service
     template_name = 'reciemviewer/layersall_list.html'
@@ -65,7 +65,7 @@ class ServiceListGenerate(generics.ListCreateAPIView):
     queryset = Service.objects.all().order_by('short')
     serializer_class = ServiceSerializer
 
-@method_decorator(cache_page(60 * 20), name='dispatch')
+@method_decorator(cache_page(60 * 60 * 4), name='dispatch')
 class VisorView(generic.ListView):
     model = Service
     template_name = 'reciemviewer/visor.html'
