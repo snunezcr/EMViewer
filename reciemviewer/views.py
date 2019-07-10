@@ -62,6 +62,7 @@ class ServiceListGenerate(generics.ListCreateAPIView):
     queryset = Service.objects.all().order_by('short')
     serializer_class = ServiceSerializer
 
+
 class VisorView(generic.ListView):
     model = Service
     template_name = 'reciemviewer/visor.html'
