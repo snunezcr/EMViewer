@@ -76,7 +76,7 @@
         var baseTile = new TileLayer({
             source: new OSM()
         });
-
+/*
         // Measurement related variables
         var source = new VectorSource();
 
@@ -107,40 +107,40 @@
       var draw;
 
       var continuePolygonMsg = 'Click para continuar dibujando el polígono';
-      var continueLineMsg = 'Click para continuar dibujando la línea';
+      var continueLineMsg = 'Click para continuar dibujando la línea'; */
 
-        app.CenterViewControl = function(opt_options) {
+      app.CenterViewControl = function(opt_options) {
+          var options = opt_options || {};
 
-            var options = opt_options || {};
+          var button = document.createElement('button');
+          button.innerHTML = '&#x2605;';
 
-            var button = document.createElement('button');
-            button.innerHTML = '&#x2605;';
-
-            var this_ = this;
-            var handleCenterView = function() {
+          var this_ = this;
+          var handleCenterView = function() {
               this_.getMap().getView().setZoom(7.2);
               this_.getMap().getView().setCenter(ol.proj.fromLonLat([-84.0, 9.40]));
-            };
+          };
 
-            button.addEventListener('click', handleCenterView, false);
-            button.addEventListener('touchstart', handleCenterView, false);
+          button.addEventListener('click', handleCenterView, false);
+          button.addEventListener('touchstart', handleCenterView, false);
 
-            var element = document.createElement('div');
-            element.className = 'center-view ol-unselectable ol-control';
-            element.appendChild(button);
+          var element = document.createElement('div');
+          element.className = 'center-view ol-unselectable ol-control';
+          element.appendChild(button);
 
-            ol.control.Control.call(this, {
-              element: element,
-              target: options.target
-            });
-        };
+          ol.control.Control.call(this, {
+            element: element,
+            target: options.target
+          });
+      };
 
+     /*
         // Measurement tools
         var pointerMoveHandler = function(evt) {
             if (evt.dragging) {
               return;
             }
-            /** @type {string} */
+
             var helpMsg = 'Click para iniciar el trazo';
 
             if (sketch) {
@@ -158,30 +158,36 @@
             helpTooltipElement.classList.remove('hidden');
         };
 
-        var map = new Map({
-            projection: "EPSG:5367",
-            units: "m",
-            loadTilesWhileAnimating: true,
-            loadTilesWhileInteracting: true,
-            target: 'map',
-            layers: [ baseTile ],
-            controls: ol.control.defaults({ attribution: false }).extend([
-                new ol.control.FullScreen(),
-                new ol.control.ScaleLine(),
-                new ol.control.ZoomSlider()
+
+      */
+     var map = new Map({
+        projection: "EPSG:5367",
+        units: "m",
+        loadTilesWhileAnimating: true,
+        loadTilesWhileInteracting: true,
+        target: 'map',
+        layers: [ baseTile ],
+        controls: ol.control.defaults({ attribution: false }).extend([
+            new ol.control.FullScreen(),
+            new ol.control.ScaleLine(),
+            new ol.control.ZoomSlider()
             ]),
-            view: new ol.View({
-              center: ol.proj.fromLonLat([-84.30, 9.80]),
-              zoom: 9,
-              enableRotation: true
-            })
-        });
+        view: new ol.View({
+          center: ol.proj.fromLonLat([-84.30, 9.80]),
+          zoom: 9,
+          enableRotation: true
+        })
+     });
 
-        map.on('pointermove', pointerMoveHandler);
+     /*
+     map.on('pointermove', pointerMoveHandler);
 
-        map.getViewport().addEventListener('mouseout', function() {
-            helpTooltipElement.classList.add('hidden');
-        });
+      */
+
+     /*
+    map.getViewport().addEventListener('mouseout', function() {
+        helpTooltipElement.classList.add('hidden');
+    });
 
         var formatLength = function(line) {
             var length = getLength(line);
@@ -246,7 +252,6 @@
                     // set sketch
                     sketch = evt.feature;
 
-                    /** @type {module:ol/coordinate~Coordinate|undefined} */
                     var tooltipCoord = evt.coordinate;
 
                     listener = sketch.getGeometry().on('change', function(evt) {
@@ -311,6 +316,9 @@
             map.removeInteraction(draw);
             addInteraction();
         };
+
+
+      */
 
         loadButton.onclick = function(event) {
             event.preventDefault();
@@ -444,6 +452,8 @@
 
         };
 
+        /*
         addInteraction();
+         */
     </script>
 {% endblock %}
