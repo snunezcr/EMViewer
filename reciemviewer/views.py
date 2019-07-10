@@ -8,8 +8,6 @@ from reciemviewer.models import Organization, Contact, Service
 from reciemviewer.serializers import OrganizationSerializer, ContactSerializer, ServiceSerializer
 from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.views.decorators.cache import cache_page
-from django.utils.decorators import method_decorator
 from django.shortcuts import render, redirect
 from django.views import generic
 from .forms import ContactForm
@@ -41,7 +39,6 @@ class ServiceView(generic.ListView):
     model = Service
     template_name = 'reciemviewer/service_list.html'
 
-@method_decorator(cache_page(60 * 60 * 4), name='dispatch')
 class LayerView(generic.ListView):
     model = Service
     template_name = 'reciemviewer/layersall_list.html'
@@ -65,7 +62,6 @@ class ServiceListGenerate(generics.ListCreateAPIView):
     queryset = Service.objects.all().order_by('short')
     serializer_class = ServiceSerializer
 
-@method_decorator(cache_page(60 * 60 * 4), name='dispatch')
 class VisorView(generic.ListView):
     model = Service
     template_name = 'reciemviewer/visor.html'
