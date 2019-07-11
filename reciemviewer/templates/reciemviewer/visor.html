@@ -3,7 +3,6 @@
 {% block content %}
 
 <h1>Visor de datos</h1>
-    <p><input id="map-measure-distance-button" type="button" value="Medir distancia"> <input id="map-measure-area-button" type="button" value="Medir area"></p>
     <div id="map"></div>
 
     <form>
@@ -45,16 +44,15 @@
     </form>
 
     <script type="text/javascript">
-        import Map from 'ol/Map.js';
-        import {unByKey} from 'ol/Observable.js';
-        import Overlay from 'ol/Overlay.js';
-        import {getArea, getLength} from 'ol/sphere.js';
-        import View from 'ol/View.js';
-        import {LineString, Polygon} from 'ol/geom.js';
-        import Draw from 'ol/interaction/Draw.js';
-        import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
-        import {OSM, Vector as VectorSource} from 'ol/source.js';
-        import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
+        //import {unByKey} from 'ol/Observable.js';
+        //import Overlay from 'ol/Overlay.js';
+        //import {getArea, getLength} from 'ol/sphere.js';
+        //import View from 'ol/View.js';
+        //import {LineString, Polygon} from 'ol/geom.js';
+        //import Draw from 'ol/interaction/Draw.js';
+        //import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
+        //import {OSM, Vector as VectorSource} from 'ol/source.js';
+        //import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
 
 
         window.app = {};
@@ -73,26 +71,26 @@
         var loadedDict = {};
         var layersDic = {};
 
-        var baseTile = new TileLayer({
-            source: new OSM()
+        var baseTile = new ol.layer.Tile({
+            source: new ol.source.OSM()
         });
-/*
-        // Measurement related variables
-        var source = new VectorSource();
 
-        var vector = new VectorLayer({
+        // Measurement related variables
+        var source = new ol.source.Vector();
+
+        var vector = new ol.layer.Vector({
         source: source,
-        style: new Style({
-          fill: new Fill({
+        style: new ol.style.Style({
+          fill: new ol.style.Fill({
             color: 'rgba(255, 255, 255, 0.2)'
           }),
-          stroke: new Stroke({
+          stroke: new ol.style.Stroke({
             color: '#ffcc33',
             width: 2
           }),
-          image: new CircleStyle({
+          image: new ol.style.Circle({
             radius: 7,
-            fill: new Fill({
+            fill: new ol.style.Fill({
               color: '#ffcc33'
             })
           })
@@ -107,7 +105,7 @@
       var draw;
 
       var continuePolygonMsg = 'Click para continuar dibujando el polígono';
-      var continueLineMsg = 'Click para continuar dibujando la línea'; */
+      var continueLineMsg = 'Click para continuar dibujando la línea';
 
       app.CenterViewControl = function(opt_options) {
           var options = opt_options || {};
@@ -134,7 +132,7 @@
           });
       };
 
-     /*
+    
         // Measurement tools
         var pointerMoveHandler = function(evt) {
             if (evt.dragging) {
@@ -145,22 +143,20 @@
 
             if (sketch) {
               var geom = (sketch.getGeometry());
-              if (geom instanceof Polygon) {
+              if (geom instanceof ol.geom.Polygon) {
                 helpMsg = continuePolygonMsg;
-              } else if (geom instanceof LineString) {
+              } else if (geom instanceof ol.geom.LineString) {
                 helpMsg = continueLineMsg;
-              }
-            }
+	    }
+        }
 
-            helpTooltipElement.innerHTML = helpMsg;
-            helpTooltip.setPosition(evt.coordinate);
+        helpTooltipElement.innerHTML = helpMsg;
+        helpTooltip.setPosition(evt.coordinate);
 
-            helpTooltipElement.classList.remove('hidden');
-        };
+     	helpTooltipElement.classList.remove('hidden');
+     };
 
-
-      */
-     var map = new Map({
+     var map = new ol.Map({
         projection: "EPSG:5367",
         units: "m",
         loadTilesWhileAnimating: true,
@@ -179,46 +175,44 @@
         })
      });
 
-     /*
      map.on('pointermove', pointerMoveHandler);
 
-      */
-
-     /*
-    map.getViewport().addEventListener('mouseout', function() {
+     map.getViewport().addEventListener('mouseout', function() {
         helpTooltipElement.classList.add('hidden');
-    });
+     });
 
-        var formatLength = function(line) {
-            var length = getLength(line);
-            var output;
-            if (length > 100) {
-              output = (Math.round(length / 1000 * 100) / 100) +
-                  ' ' + 'km';
-            } else {
-              output = (Math.round(length * 100) / 100) +
+     var formatLength = function(line) {
+         var length = getLength(line);
+         var output;
+         if (length > 100) {
+            output = (Math.round(length / 1000 * 100) / 100) +
+               ' ' + 'km';
+         } else {
+            output = (Math.round(length * 100) / 100) +
                   ' ' + 'm';
-            }
-            return output;
-        };
+         }
+         return output;
+     };
 
-        var formatArea = function(polygon) {
-            var area = getArea(polygon);
-            var output;
-            if (area > 10000) {
-              output = (Math.round(area / 1000000 * 100) / 100) +
-                  ' ' + 'km<sup>2</sup>';
-            } else {
-              output = (Math.round(area * 100) / 100) +
+     var formatArea = function(polygon) {
+         var area = getArea(polygon);
+         var output;
+            
+         if (area > 10000) {
+             output = (Math.round(area / 1000000 * 100) / 100) +
+                   ' ' + 'km<sup>2</sup>';
+         } else {
+             output = (Math.round(area * 100) / 100) +
                   ' ' + 'm<sup>2</sup>';
-            }
-            return output;
-        };
+         }
+         return output;
+     };
 
+/*
         function addInteraction() {
             if (typeSelect.value != 'none') {
                 var type = (typeSelect.value == 'area' ? 'Polygon' : 'LineString');
-                draw = new Draw({
+                draw = new ol.interaction.Draw({
                     source: source,
                     type: type,
                     style: new Style({
@@ -282,7 +276,7 @@
             } else {
                 map.removeInteraction(draw);
             }
-        }
+        } */
 
         function createHelpTooltip() {
             if (helpTooltipElement) {
@@ -290,7 +284,7 @@
             }
             helpTooltipElement = document.createElement('div');
             helpTooltipElement.className = 'tooltip hidden';
-            helpTooltip = new Overlay({
+            helpTooltip = new ol.Overlay({
               element: helpTooltipElement,
               offset: [15, 0],
               positioning: 'center-left'
@@ -304,7 +298,7 @@
             }
             measureTooltipElement = document.createElement('div');
             measureTooltipElement.className = 'tooltip tooltip-measure';
-            measureTooltip = new Overlay({
+            measureTooltip = new ol.Overlay({
               element: measureTooltipElement,
               offset: [0, -15],
               positioning: 'bottom-center'
@@ -312,6 +306,7 @@
             map.addOverlay(measureTooltip);
         }
 
+	/*
         typeSelect.onchange = function() {
             map.removeInteraction(draw);
             addInteraction();
