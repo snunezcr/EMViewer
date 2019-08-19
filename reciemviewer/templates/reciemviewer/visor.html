@@ -27,7 +27,14 @@
         </select>
 
         <p>
-        <input id="map-load-button" type="button" value="Cargar"> <input id="map-clean-button" type="button" value="Limpiar mapa">
+            <input id="map-load-button" type="button" value="Cargar">
+            <input id="map-clean-button" type="button" value="Limpiar mapa">
+            <label>Tipo de medida: &nbsp;</label>
+            <select id="type">
+                <option value="none">Ninguno</option>
+                <option value="length">Longitud</option>
+                <option value="area">Area</option>
+            </select>
         </p>
 
         <label id="query-test"></label>
@@ -173,10 +180,7 @@
             })
         });
 
-     /*
-     map.on('pointermove', pointerMoveHandler);
-
-      */
+        map.on('pointermove', pointerMoveHandler);
 
      /*
     map.getViewport().addEventListener('mouseout', function() {
