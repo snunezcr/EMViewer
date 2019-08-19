@@ -3,16 +3,9 @@
 {% block content %}
 
 <h1>Visor de datos</h1>
-    <p><input id="map-measure-distance-button" type="button" value="Medir distancia"> <input id="map-measure-area-button" type="button" value="Medir area"></p>
     <div id="map"></div>
 
     <form>
-         <label>Herramientas de medici&oacute;n &nbsp;</label>
-         <select id="measure-type">
-            <option value="none">Ninguna</option>
-            <option value="length">Distancia</option>
-            <option value="area">&Aacute;rea</option>
-        </select>
         <br>
         <select id="map-load-control">
             {% if service_list %}
@@ -30,10 +23,11 @@
             <input id="map-load-button" type="button" value="Cargar">
             <input id="map-clean-button" type="button" value="Limpiar mapa">
             <label>Tipo de medida: &nbsp;</label>
-            <select id="type">
-                <option value="none">Ninguno</option>
-                <option value="length">Longitud</option>
-                <option value="area">Area</option>
+            <label>Herramientas de medici&oacute;n &nbsp;</label>
+             <select id="measure-type">
+                <option value="none">Ninguna</option>
+                <option value="length">Distancia</option>
+                <option value="area">&Aacute;rea</option>
             </select>
         </p>
 
