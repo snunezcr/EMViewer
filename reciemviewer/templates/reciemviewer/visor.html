@@ -45,15 +45,11 @@
     </form>
 
     <script type="text/javascript">
-        import {unByKey} from 'ol/Observable.js';
-        import Overlay from 'ol/Overlay.js';
-        import {getArea, getLength} from 'ol/sphere.js';
-        import View from 'ol/View.js';
-        import {LineString, Polygon} from 'ol/geom.js';
-        import Draw from 'ol/interaction/Draw.js';
-        import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
-        import {OSM, Vector as VectorSource} from 'ol/source.js';
-        import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
+        //import {LineString, Polygon} from 'ol/geom.js';
+        //import Draw from 'ol/interaction/Draw.js';
+        //import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
+        //import {OSM, Vector as VectorSource} from 'ol/source.js';
+        //import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
 
 
         window.app = {};
@@ -73,25 +69,25 @@
         var layersDic = {};
 
         var baseTile = new ol.layer.Tile({
-            source: new OSM()
+            source: new ol.source.OSM()
         });
 
         // Measurement related variables
-        var source = new VectorSource();
+        var source = new ol.source.Vector();
 
-        var vector = new VectorLayer({
+        var vector = new ol.layer.Vector({
         source: source,
-        style: new Style({
-            fill: new Fill({
+        style: new ol.style.Style({
+            fill: new ol.style.Fill({
                 color: 'rgba(255, 255, 255, 0.2)'
             }),
-            stroke: new Stroke({
+            stroke: new ol.style.Stroke({
                 color: '#ffcc33',
                 width: 2
             }),
-            image: new CircleStyle({
+            image: new ol.style.Circle({
                 radius: 7,
-                fill: new Fill({color: '#ffcc33' })
+                fill: new ol.style.Fill({color: '#ffcc33' })
             })
           })
         });
@@ -131,7 +127,6 @@
         };
 
         // Measurement tools
-        /*
         var pointerMoveHandler = function(evt) {
             if (evt.dragging) {
               return;
@@ -152,7 +147,7 @@
             helpTooltip.setPosition(evt.coordinate);
 
             helpTooltipElement.classList.remove('hidden');
-        }; */
+        };
 
         var map = new ol.Map({
             projection: "EPSG:5367",
@@ -173,15 +168,14 @@
             })
         });
 
-        //map.on('pointermove', pointerMoveHandler);
+        map.on('pointermove', pointerMoveHandler);
 
-     /*
-    map.getViewport().addEventListener('mouseout', function() {
-        helpTooltipElement.classList.add('hidden');
-    });
+        map.getViewport().addEventListener('mouseout', function() {
+            helpTooltipElement.classList.add('hidden');
+        });
 
         var formatLength = function(line) {
-            var length = getLength(line);
+            var length = ol.sphere.getLength(line);
             var output;
             if (length > 100) {
               output = (Math.round(length / 1000 * 100) / 100) +
@@ -194,7 +188,7 @@
         };
 
         var formatArea = function(polygon) {
-            var area = getArea(polygon);
+            var area = ol.sphere.getArea(polygon);
             var output;
             if (area > 10000) {
               output = (Math.round(area / 1000000 * 100) / 100) +
@@ -207,26 +201,26 @@
         };
 
         function addInteraction() {
-            if (typeSelect.value != 'none') {
-                var type = (typeSelect.value == 'area' ? 'Polygon' : 'LineString');
-                draw = new Draw({
+            if (typeSelect.value !== 'none') {
+                var type = (typeSelect.value === 'area' ? 'ol.geom.Polygon' : 'ol.geom.LineString');
+                draw = new ol.interaction.Draw({
                     source: source,
                     type: type,
-                    style: new Style({
-                            fill: new Fill({
+                    style: new new ol.style.Style({
+                            fill: new ol.style.Fill({
                             color: 'rgba(255, 255, 255, 0.2)'
                         }),
-                        stroke: new Stroke({
+                        stroke: new ol.style.Stroke({
                             color: 'rgba(0, 0, 0, 0.5)',
                             lineDash: [10, 10],
                             width: 2
                         }),
-                        image: new CircleStyle({
+                        image: new ol.style.Circle({
                             radius: 5,
-                            stroke: new Stroke({
+                            stroke: new ol.style.Stroke({
                                 color: 'rgba(0, 0, 0, 0.7)'
                             }),
-                            fill: new Fill({
+                            fill: new ol.style.Fill({
                                 color: 'rgba(255, 255, 255, 0.2)'
                             })
                         })
@@ -269,7 +263,7 @@
                     // unset tooltip so that a new one can be created
                     measureTooltipElement = null;
                     createMeasureTooltip();
-                    unByKey(listener);}, this);
+                    ol.Observable.unByKey(listener);}, this);
             } else {
                 map.removeInteraction(draw);
             }
@@ -281,7 +275,7 @@
             }
             helpTooltipElement = document.createElement('div');
             helpTooltipElement.className = 'tooltip hidden';
-            helpTooltip = new Overlay({
+            helpTooltip = new ol.Overlay({
               element: helpTooltipElement,
               offset: [15, 0],
               positioning: 'center-left'
@@ -295,7 +289,7 @@
             }
             measureTooltipElement = document.createElement('div');
             measureTooltipElement.className = 'tooltip tooltip-measure';
-            measureTooltip = new Overlay({
+            measureTooltip = new ol.Overlay({
               element: measureTooltipElement,
               offset: [0, -15],
               positioning: 'bottom-center'
@@ -308,9 +302,8 @@
             addInteraction();
         };
 
+        addInteraction();
 
-      */
-    /*
         loadButton.onclick = function(event) {
             event.preventDefault();
 
@@ -442,9 +435,5 @@
             document.getElementById("img-legend").src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 
         };
-
-
-        addInteraction();
-         */
     </script>
 {% endblock %}
