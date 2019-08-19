@@ -83,58 +83,54 @@
         var vector = new VectorLayer({
         source: source,
         style: new Style({
-          fill: new Fill({
-            color: 'rgba(255, 255, 255, 0.2)'
-          }),
-          stroke: new Stroke({
-            color: '#ffcc33',
-            width: 2
-          }),
-          image: new CircleStyle({
-            radius: 7,
             fill: new Fill({
-              color: '#ffcc33'
+                color: 'rgba(255, 255, 255, 0.2)'
+            }),
+            stroke: new Stroke({
+                color: '#ffcc33',
+                width: 2
+            }),
+            image: new CircleStyle({
+                radius: 7,
+                fill: new Fill({color: '#ffcc33' })
             })
           })
-        })
-      });
+        });
 
-      var sketch;
-      var helpTooltipElement;
-      var helpTooltip;
-      var measureTooltipElement;
-      var measureTooltip;
-      var draw;
+        var sketch;
+        var helpTooltipElement;
+        var helpTooltip;
+        var measureTooltipElement;
+        var measureTooltip;
+        var draw;
 
-      var continuePolygonMsg = 'Click para continuar dibujando el polígono';
-      var continueLineMsg = 'Click para continuar dibujando la línea';
+        var continuePolygonMsg = 'Click para continuar dibujando el polígono';
+        var continueLineMsg = 'Click para continuar dibujando la línea';
 
-      app.CenterViewControl = function(opt_options) {
-          var options = opt_options || {};
+        app.CenterViewControl = function(opt_options) {
+            var options = opt_options || {};
+            var button = document.createElement('button');
+            button.innerHTML = '&#x2605;';
+            var this_ = this;
 
-          var button = document.createElement('button');
-          button.innerHTML = '&#x2605;';
+            var handleCenterView = function() {
+                this_.getMap().getView().setZoom(7.2);
+                this_.getMap().getView().setCenter(ol.proj.fromLonLat([-84.0, 9.40]));
+            };
 
-          var this_ = this;
-          var handleCenterView = function() {
-              this_.getMap().getView().setZoom(7.2);
-              this_.getMap().getView().setCenter(ol.proj.fromLonLat([-84.0, 9.40]));
-          };
+            button.addEventListener('click', handleCenterView, false);
+            button.addEventListener('touchstart', handleCenterView, false);
 
-          button.addEventListener('click', handleCenterView, false);
-          button.addEventListener('touchstart', handleCenterView, false);
+            var element = document.createElement('div');
+            element.className = 'center-view ol-unselectable ol-control';
+            element.appendChild(button);
 
-          var element = document.createElement('div');
-          element.className = 'center-view ol-unselectable ol-control';
-          element.appendChild(button);
+            ol.control.Control.call(this, {
+                element: element,
+                target: options.target
+            });
+        };
 
-          ol.control.Control.call(this, {
-            element: element,
-            target: options.target
-          });
-      };
-
-     /*
         // Measurement tools
         var pointerMoveHandler = function(evt) {
             if (evt.dragging) {
@@ -158,26 +154,24 @@
             helpTooltipElement.classList.remove('hidden');
         };
 
-
-      */
-     var map = new Map({
-        projection: "EPSG:5367",
-        units: "m",
-        loadTilesWhileAnimating: true,
-        loadTilesWhileInteracting: true,
-        target: 'map',
-        layers: [ baseTile ],
-        controls: ol.control.defaults({ attribution: false }).extend([
-            new ol.control.FullScreen(),
-            new ol.control.ScaleLine(),
-            new ol.control.ZoomSlider()
-            ]),
-        view: new ol.View({
-          center: ol.proj.fromLonLat([-84.30, 9.80]),
-          zoom: 9,
-          enableRotation: true
-        })
-     });
+        var map = new Map({
+            projection: "EPSG:5367",
+            units: "m",
+            loadTilesWhileAnimating: true,
+            loadTilesWhileInteracting: true,
+            target: 'map',
+            layers: [ baseTile ],
+            controls: ol.control.defaults({ attribution: false }).extend([
+                new ol.control.FullScreen(),
+                new ol.control.ScaleLine(),
+                new ol.control.ZoomSlider()
+                ]),
+            view: new ol.View({
+              center: ol.proj.fromLonLat([-84.30, 9.80]),
+              zoom: 9,
+              enableRotation: true
+            })
+        });
 
      /*
      map.on('pointermove', pointerMoveHandler);
