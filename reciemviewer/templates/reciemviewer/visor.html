@@ -21,13 +21,22 @@
 
         <p>
             <input id="map-load-button" type="button" value="Cargar">
-            <input id="map-clean-button" type="button" value="Limpiar mapa">
-            <label>Herramientas de medici&oacute;n &nbsp;:</label>
-             <select id="measure-type">
-                <option value="none">Ninguna</option>
-                <option value="length">Distancia</option>
-                <option value="area">&Aacute;rea</option>
+            <input id="map-clean-button" type="button" value="Reiniciar mapa">
+            <input id="map-clean-draw" type="button" value="Limpiar trazos">
+        </p>
+        <p>
+            <input id="activate-trace" type="checkbox">  Herramientas de trazo: </input>
+            <select id="measure-type">
+                <option value="Point">Punto</option>
+                <option value="LineString">Distancia</option>
+                <option value="Polygon">Poligono</option>
+                <option value="Circle">Circulo</option>
             </select>
+        </p>
+        <p>
+            <label>Nivel del mar: </label>
+            <input id="sea-level" type="range" min="0" max="100" value="1"/>
+            +<span id="sea-output"></span> m
         </p>
 
         <label id="query-test"></label>
@@ -45,22 +54,19 @@
     </form>
 
     <script type="text/javascript">
-        //import {LineString, Polygon} from 'ol/geom.js';
-        //import Draw from 'ol/interaction/Draw.js';
-        //import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
-        //import {OSM, Vector as VectorSource} from 'ol/source.js';
-        //import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
-
-
         window.app = {};
 
         var app = window.app;
         var mapLoadInput = document.getElementById('map-load-control');
         var loadButton = document.getElementById('map-load-button');
         var cleanButton = document.getElementById('map-clean-button');
+        var cdrawButton = document.getElementById('map-clean-draw');
         var testLabel = document.getElementById('query-test');
         var histTable = document.getElementById('load-history');
-        var typeSelect = document.getElementById('measure-type');
+        var typeTraceSelect = document.getElementById('measure-type');
+        var traceCheck = document.getElementById('activate-trace');
+        var seaControl = document.getElementById('sea-level');
+        var seaOutput = document.getElementById('sea-output');
 
         var legendOnOff = false;
 
@@ -79,7 +85,7 @@
         source: source,
         style: new ol.style.Style({
             fill: new ol.style.Fill({
-                color: 'rgba(255, 255, 255, 0.2)'
+                color: 'rgba(255,248,35,0.2)'
             }),
             stroke: new ol.style.Stroke({
                 color: '#ffcc33',
@@ -92,12 +98,26 @@
           })
         });
 
+        var key = 'pk.eyJ1Ijoic251bmV6Y3IiLCJhIjoiY2pqYzF6d242M3g4bjNzb2dnczB5eGlvcSJ9.jfGNKX1WXmzRaIC6bK74YA';
+
+        var elevation = new ol.source.XYZ({
+            url: 'https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=' + key,
+            crossOrigin: 'anonymous',
+            transition: 0
+        });
+
+        var seaRaster = new ol.source.Raster({
+            sources: [elevation],
+            operation: flood
+        });
+
         var sketch;
         var helpTooltipElement;
         var helpTooltip;
         var measureTooltipElement;
         var measureTooltip;
         var draw;
+        var snap;
 
         var continuePolygonMsg = 'Click para continuar dibujando el polígono';
         var continueLineMsg = 'Click para continuar dibujando la línea';
@@ -127,6 +147,7 @@
         };
 
         // Measurement tools
+        /*
         var pointerMoveHandler = function(evt) {
             if (evt.dragging) {
               return;
@@ -136,9 +157,9 @@
 
             if (sketch) {
               var geom = (sketch.getGeometry());
-              if (geom instanceof Polygon) {
+              if (geom instanceof ol.geom.Polygon) {
                 helpMsg = continuePolygonMsg;
-              } else if (geom instanceof LineString) {
+              } else if (geom instanceof ol.geom.LineString) {
                 helpMsg = continueLineMsg;
               }
             }
@@ -147,7 +168,7 @@
             helpTooltip.setPosition(evt.coordinate);
 
             helpTooltipElement.classList.remove('hidden');
-        };
+        }; */
 
         var map = new ol.Map({
             projection: "EPSG:5367",
@@ -155,11 +176,19 @@
             loadTilesWhileAnimating: true,
             loadTilesWhileInteracting: true,
             target: 'map',
-            layers: [ baseTile ],
-            controls: ol.control.defaults({ attribution: false }).extend([
+            layers: [
+                baseTile,
+                new ol.layer.Image({
+                    opacity: 0.6,
+                    source: seaRaster
+                }),
+                vector
+            ],
+            controls: ol.control.defaults({ attribution: true }).extend([
                 new ol.control.FullScreen(),
                 new ol.control.ScaleLine(),
-                new ol.control.ZoomSlider()
+                new ol.control.ZoomSlider(),
+                new ol.control.OverviewMap
                 ]),
             view: new ol.View({
               center: ol.proj.fromLonLat([-84.30, 9.80]),
@@ -168,7 +197,33 @@
             })
         });
 
-        map.on('pointermove', pointerMoveHandler);
+        var modify = new ol.interaction.Modify({source: source});
+
+        if (traceCheck.checked == true)
+            map.addInteraction(modify);
+
+        function addInteractionsDrawSnap() {
+            draw = new ol.interaction.Draw({
+                source: source,
+                type: typeTraceSelect.value
+            });
+            map.addInteraction(draw);
+            snap = new ol.interaction.Snap({source: source});
+            map.addInteraction(snap);
+        }
+
+        typeTraceSelect.onchange = function() {
+            if (traceCheck.checked == true)  {
+                map.removeInteraction(draw);
+                map.removeInteraction(snap);
+                addInteractionsDrawSnap();
+            }
+        };
+
+        if (traceCheck.checked == true)
+            addInteractionsDrawSnap();
+
+        /*map.on('pointermove', pointerMoveHandler);
 
         map.getViewport().addEventListener('mouseout', function() {
             helpTooltipElement.classList.add('hidden');
@@ -201,12 +256,15 @@
         };
 
         function addInteraction() {
+            createMeasureTooltip();
+            createHelpTooltip();
+
             if (typeSelect.value !== 'none') {
                 var type = (typeSelect.value === 'area' ? 'ol.geom.Polygon' : 'ol.geom.LineString');
                 draw = new ol.interaction.Draw({
                     source: source,
                     type: type,
-                    style: new new ol.style.Style({
+                    style: new ol.style.Style({
                             fill: new ol.style.Fill({
                             color: 'rgba(255, 255, 255, 0.2)'
                         }),
@@ -227,9 +285,6 @@
                     })
                 });
                 map.addInteraction(draw);
-
-                createMeasureTooltip();
-                createHelpTooltip();
 
                 var listener;
                 draw.on('drawstart',
@@ -264,8 +319,6 @@
                     measureTooltipElement = null;
                     createMeasureTooltip();
                     ol.Observable.unByKey(listener);}, this);
-            } else {
-                map.removeInteraction(draw);
             }
         }
 
@@ -302,8 +355,26 @@
             addInteraction();
         };
 
-        addInteraction();
+        addInteraction(); */
 
+        // Fuctions to simulate flooding
+        function flood(pixels, data) {
+            var pixel = pixels[0];
+            if (pixel[3]) {
+              var height = -10000 + ((pixel[0] * 256 * 256 + pixel[1] * 256 + pixel[2]) * 0.1);
+              if (height <= data.level) {
+                pixel[0] = 145;
+                pixel[1] = 175;
+                pixel[2] = 186;
+                pixel[3] = 255;
+              } else {
+                pixel[3] = 0;
+              }
+            }
+            return pixel;
+        }
+
+        // Map load controls
         loadButton.onclick = function(event) {
             event.preventDefault();
 
@@ -408,7 +479,7 @@
                     btre.appendChild(btnremove);
 
                     lgre = row.insertCell(1);
-                    lgre.appendChild(btnlegend)
+                    lgre.appendChild(btnlegend);
 
                     slre = row.insertCell(2);
                     btre.appendChild(sldopacity);
@@ -435,5 +506,36 @@
             document.getElementById("img-legend").src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 
         };
+
+        cdrawButton.onclick = function(event) {
+            event.preventDefault();
+
+            source.clear();
+        };
+
+        traceCheck.onchange = function(event) {
+            event.preventDefault();
+
+            if (traceCheck.checked == true) {
+                map.addInteraction(modify);
+                addInteractionsDrawSnap();
+            } else {
+                map.removeInteraction(draw);
+                map.removeInteraction(snap);
+            }
+        };
+
+        seaControl.addEventListener('input', function() {
+            seaOutput.innerText = seaControl.value;
+            seaRaster.changed();
+        });
+
+        seaRaster.on('beforeoperations', function(event) {
+            event.data.level = seaControl.value;
+        });
+
+        seaOutput.innerText = seaControl.value;
+
+
     </script>
 {% endblock %}
