@@ -26,7 +26,7 @@
         </p>
         <p>
             <input id="activate-trace" type="checkbox">  Herramientas de trazo: </input>
-            <select id="measure-type">
+            <select id="trace-type">
                 <option value="Point">Punto</option>
                 <option value="LineString">Distancia</option>
                 <option value="Polygon">Poligono</option>
@@ -34,8 +34,16 @@
             </select>
         </p>
         <p>
+            <input id="activate-measure" type="checkbox">  Herramientas de medicion: </input>
+            <select id="measure-type">
+                <option value="LineString">Distancia</option>
+                <option value="Polygon">Poligono</option>
+            </select>
+        </p>
+
+        <p>
             <label>Nivel del mar: </label>
-            <input id="sea-level" type="range" min="0" max="100" value="1"/>
+            <input id="sea-level" type="range" min="0.0" step="0.1" max="15" value="0"/>
             +<span id="sea-output"></span> m
         </p>
 
@@ -63,8 +71,10 @@
         var cdrawButton = document.getElementById('map-clean-draw');
         var testLabel = document.getElementById('query-test');
         var histTable = document.getElementById('load-history');
-        var typeTraceSelect = document.getElementById('measure-type');
+        var typeTraceSelect = document.getElementById('trace-type');
+        var typeMeasureSelect = document.getElementById('measure-type');
         var traceCheck = document.getElementById('activate-trace');
+        var measureCheck = document.getElementById('activate-measure');
         var seaControl = document.getElementById('sea-level');
         var seaOutput = document.getElementById('sea-output');
 
@@ -100,14 +110,14 @@
 
         var key = 'pk.eyJ1Ijoic251bmV6Y3IiLCJhIjoiY2pqYzF6d242M3g4bjNzb2dnczB5eGlvcSJ9.jfGNKX1WXmzRaIC6bK74YA';
 
-        var elevation = new ol.source.XYZ({
+        var seaElevation = new ol.source.XYZ({
             url: 'https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=' + key,
             crossOrigin: 'anonymous',
             transition: 0
         });
 
         var seaRaster = new ol.source.Raster({
-            sources: [elevation],
+            sources: [seaElevation],
             operation: flood
         });
 
@@ -118,6 +128,7 @@
         var measureTooltip;
         var draw;
         var snap;
+        var measure;
 
         var continuePolygonMsg = 'Click para continuar dibujando el polígono';
         var continueLineMsg = 'Click para continuar dibujando la línea';
@@ -146,29 +157,27 @@
             });
         };
 
-        // Measurement tools
-        /*
         var pointerMoveHandler = function(evt) {
             if (evt.dragging) {
-              return;
+                return;
             }
 
-            var helpMsg = 'Click para iniciar el trazo';
+            var helpMsg = 'Click para iniciar el dibujo';
 
             if (sketch) {
-              var geom = (sketch.getGeometry());
-              if (geom instanceof ol.geom.Polygon) {
-                helpMsg = continuePolygonMsg;
-              } else if (geom instanceof ol.geom.LineString) {
-                helpMsg = continueLineMsg;
-              }
+                var geom = (sketch.getGeometry());
+                if (geom instanceof ol.geom.Polygon) {
+                    helpMsg = continuePolygonMsg;
+                } else if (geom instanceof ol.geom.LineString) {
+                    helpMsg = continueLineMsg;
+                }
             }
 
             helpTooltipElement.innerHTML = helpMsg;
             helpTooltip.setPosition(evt.coordinate);
 
             helpTooltipElement.classList.remove('hidden');
-        }; */
+        };
 
         var map = new ol.Map({
             projection: "EPSG:5367",
@@ -223,141 +232,7 @@
         if (traceCheck.checked == true)
             addInteractionsDrawSnap();
 
-        /*map.on('pointermove', pointerMoveHandler);
-
-        map.getViewport().addEventListener('mouseout', function() {
-            helpTooltipElement.classList.add('hidden');
-        });
-
-        var formatLength = function(line) {
-            var length = ol.sphere.getLength(line);
-            var output;
-            if (length > 100) {
-              output = (Math.round(length / 1000 * 100) / 100) +
-                  ' ' + 'km';
-            } else {
-              output = (Math.round(length * 100) / 100) +
-                  ' ' + 'm';
-            }
-            return output;
-        };
-
-        var formatArea = function(polygon) {
-            var area = ol.sphere.getArea(polygon);
-            var output;
-            if (area > 10000) {
-              output = (Math.round(area / 1000000 * 100) / 100) +
-                  ' ' + 'km<sup>2</sup>';
-            } else {
-              output = (Math.round(area * 100) / 100) +
-                  ' ' + 'm<sup>2</sup>';
-            }
-            return output;
-        };
-
-        function addInteraction() {
-            createMeasureTooltip();
-            createHelpTooltip();
-
-            if (typeSelect.value !== 'none') {
-                var type = (typeSelect.value === 'area' ? 'ol.geom.Polygon' : 'ol.geom.LineString');
-                draw = new ol.interaction.Draw({
-                    source: source,
-                    type: type,
-                    style: new ol.style.Style({
-                            fill: new ol.style.Fill({
-                            color: 'rgba(255, 255, 255, 0.2)'
-                        }),
-                        stroke: new ol.style.Stroke({
-                            color: 'rgba(0, 0, 0, 0.5)',
-                            lineDash: [10, 10],
-                            width: 2
-                        }),
-                        image: new ol.style.Circle({
-                            radius: 5,
-                            stroke: new ol.style.Stroke({
-                                color: 'rgba(0, 0, 0, 0.7)'
-                            }),
-                            fill: new ol.style.Fill({
-                                color: 'rgba(255, 255, 255, 0.2)'
-                            })
-                        })
-                    })
-                });
-                map.addInteraction(draw);
-
-                var listener;
-                draw.on('drawstart',
-                  function(evt) {
-                    // set sketch
-                    sketch = evt.feature;
-
-                    var tooltipCoord = evt.coordinate;
-
-                    listener = sketch.getGeometry().on('change', function(evt) {
-                      var geom = evt.target;
-                      var output;
-                      if (geom instanceof Polygon) {
-                        output = formatArea(geom);
-                        tooltipCoord = geom.getInteriorPoint().getCoordinates();
-                      } else if (geom instanceof LineString) {
-                        output = formatLength(geom);
-                        tooltipCoord = geom.getLastCoordinate();
-                      }
-                      measureTooltipElement.innerHTML = output;
-                      measureTooltip.setPosition(tooltipCoord);
-                    });
-                  }, this);
-
-                draw.on('drawend',
-                  function() {
-                    measureTooltipElement.className = 'tooltip tooltip-static';
-                    measureTooltip.setOffset([0, -7]);
-                    // unset sketch
-                    sketch = null;
-                    // unset tooltip so that a new one can be created
-                    measureTooltipElement = null;
-                    createMeasureTooltip();
-                    ol.Observable.unByKey(listener);}, this);
-            }
-        }
-
-        function createHelpTooltip() {
-            if (helpTooltipElement) {
-              helpTooltipElement.parentNode.removeChild(helpTooltipElement);
-            }
-            helpTooltipElement = document.createElement('div');
-            helpTooltipElement.className = 'tooltip hidden';
-            helpTooltip = new ol.Overlay({
-              element: helpTooltipElement,
-              offset: [15, 0],
-              positioning: 'center-left'
-            });
-            map.addOverlay(helpTooltip);
-        }
-
-        function createMeasureTooltip() {
-            if (measureTooltipElement) {
-              measureTooltipElement.parentNode.removeChild(measureTooltipElement);
-            }
-            measureTooltipElement = document.createElement('div');
-            measureTooltipElement.className = 'tooltip tooltip-measure';
-            measureTooltip = new ol.Overlay({
-              element: measureTooltipElement,
-              offset: [0, -15],
-              positioning: 'bottom-center'
-            });
-            map.addOverlay(measureTooltip);
-        }
-
-        typeSelect.onchange = function() {
-            map.removeInteraction(draw);
-            addInteraction();
-        };
-
-        addInteraction(); */
-
-        // Fuctions to simulate flooding
+        // Fuction to simulate flooding
         function flood(pixels, data) {
             var pixel = pixels[0];
             if (pixel[3]) {
@@ -372,6 +247,126 @@
               }
             }
             return pixel;
+        }
+
+        var formatLength = function(line) {
+            var length = ol.sphere.getLength(line);
+            var output;
+            if (length > 100) {
+                output = (Math.round(length / 1000 * 100) / 100) +
+                  ' ' + 'km';
+            } else {
+                output = (Math.round(length * 100) / 100) +
+                  ' ' + 'm';
+            }
+            return output;
+        };
+
+        var formatArea = function(polygon) {
+            var area = ol.sphere.getArea(polygon);
+            var output;
+            if (area > 10000) {
+                output = (Math.round(area / 1000000 * 100) / 100) +
+                    ' ' + 'km<sup>2</sup>';
+            } else {
+                output = (Math.round(area * 100) / 100) +
+                    ' ' + 'm<sup>2</sup>';
+            }
+            return output;
+        };
+
+        function addInteraction() {
+            var type = (typeMeasureSelect.value == 'area' ? 'Polygon' : 'LineString');
+            measure = new ol.interaction.Draw({
+                source: source,
+                type: type,
+                style: new ol.style.Style({
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: 'rgba(0, 0, 0, 0.5)',
+                        lineDash: [10, 10],
+                        width: 2
+                    }),
+                    image: new ol.style.Circle({
+                        radius: 5,
+                        stroke: new ol.style.Stroke({
+                            color: 'rgba(0, 0, 0, 0.7)'
+                        }),
+                        fill: new ol.style.Fill({
+                            color: 'rgba(255, 255, 255, 0.2)'
+                        })
+                    })
+                })
+            });
+            map.addInteraction(measure);
+
+            createMeasureTooltip();
+            createHelpTooltip();
+
+            var listener;
+            measure.on('drawstart',
+                function(evt) {
+                    // set sketch
+                    sketch = evt.feature;
+
+                    var tooltipCoord = evt.coordinate;
+
+                    listener = sketch.getGeometry().on('change', function(evt) {
+                        var geom = evt.target;
+                        var output;
+                        if (geom instanceof ol.geom.Polygon) {
+                            output = formatArea(geom);
+                            tooltipCoord = geom.getInteriorPoint().getCoordinates();
+                        } else if (geom instanceof ol.geom.LineString) {
+                            output = formatLength(geom);
+                            tooltipCoord = geom.getLastCoordinate();
+                        }
+                        measureTooltipElement.innerHTML = output;
+                        measureTooltip.setPosition(tooltipCoord);
+                    });
+                }, this);
+
+            measure.on('drawend',
+                function() {
+                    measureTooltipElement.className = 'tooltip tooltip-static';
+                    measureTooltip.setOffset([0, -7]);
+                    // unset sketch
+                    sketch = null;
+                    // unset tooltip so that a new one can be created
+                    measureTooltipElement = null;
+                    createMeasureTooltip();
+                    ol.Observable.unByKey(listener);
+                }, this);
+        }
+
+        function createHelpTooltip() {
+            if (helpTooltipElement) {
+                helpTooltipElement.parentNode.removeChild(helpTooltipElement);
+            }
+            helpTooltipElement = document.createElement('div');
+            helpTooltipElement.className = 'tooltip hidden';
+            helpTooltip = new ol.Overlay({
+                element: helpTooltipElement,
+                offset: [15, 0],
+                positioning: 'center-left'
+            });
+            map.addOverlay(helpTooltip);
+        }
+
+        function createMeasureTooltip() {
+            if (measureTooltipElement) {
+                measureTooltipElement.parentNode.removeChild(measureTooltipElement);
+            }
+            measureTooltipElement = document.createElement('div');
+            measureTooltipElement.className = 'tooltip tooltip-measure';
+            measureTooltip = new ol.Overlay({
+                element: measureTooltipElement,
+                offset: [0, -15],
+                positioning: 'bottom-center'
+            });
+            map.addOverlay(measureTooltip);
         }
 
         // Map load controls
@@ -520,10 +515,24 @@
                 map.addInteraction(modify);
                 addInteractionsDrawSnap();
             } else {
+                map.removeInteraction(modify);
                 map.removeInteraction(draw);
                 map.removeInteraction(snap);
             }
         };
+
+        measureCheck.onchange = function(event) {
+            event.preventDefault();
+
+            if (measureCheck.checked == true) {
+                addInteraction();
+            } else {
+                map.removeInteraction(measure);
+            }
+        };
+
+        if (measureCheck.checked == true)
+            addInteraction();
 
         seaControl.addEventListener('input', function() {
             seaOutput.innerText = seaControl.value;
@@ -531,11 +540,9 @@
         });
 
         seaRaster.on('beforeoperations', function(event) {
-            event.data.level = seaControl.value;
+            event.data.level = seaControl.value - 1.0;
         });
 
         seaOutput.innerText = seaControl.value;
-
-
     </script>
 {% endblock %}
